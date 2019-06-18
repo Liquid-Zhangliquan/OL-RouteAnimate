@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8' />
+    <title>Animate a point along a route</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.0.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.0.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <style>
+        .overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+
+        .overlay button {
+            font: 600 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+            background-color: #3386c0;
+            color: #fff;
+            display: inline-block;
+            margin: 0;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        .overlay button:hover {
+            background-color: #4ea0da;
+        }
+    </style>
+    <script src="https://cdn.bootcss.com/Turf.js/5.1.6/turf.min.js"></script>
+
+    <div id='map'></div>
+    <div class='overlay'>
+        <button id='replay'>Replay</button>
+    </div>
+
+    <script>
+        mapboxgl.accessToken =
+            "pk.eyJ1IjoiaHllb25namlua2ltIiwiYSI6ImNpZXh4dXp5eDA2YjFzaGtyOGR2dnBza2oifQ.a5K673tSr0cOcYoX1rpPhg";
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v9',
+            center: [110.2998991, 20.0126324],//[-122.48369693756104, 37.83381888486939],
+            zoom: 14
+        });
+        var route = {
+            "type": "Feature",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [[112.2998991, 22.0126324], [112.2996097, 22.0134472], [112.2996597, 22.0133881], [112.2777231, 22.0164887], [112.2774728, 22.0166772], [112.2774033, 22.0165736], [112.2775611, 22.0164055], [112.2776283, 22.0161038], [112.2776846, 22.0163612], [112.2776739, 22.0163395], [112.2776479, 22.0163987], [112.2776427, 22.0162798], [112.2775763, 22.016116], [112.2777229, 22.0161367], [112.2777592, 22.0161772], [112.2777634, 22.0162569], [112.277711, 22.0162228], [112.2776429, 22.0159677], [112.2777159, 22.0164053], [112.2777012, 22.0164482], [112.2777467, 22.0159461], [112.2774918, 22.016228], [112.2777323, 22.0163755], [112.27788, 22.0156734], [112.2777364, 22.0161047], [112.2777321, 22.0154175], [112.2775976, 22.0159372], [112.2775141, 22.0164522], [112.2773987, 22.0163157], [112.2777456, 22.016317], [112.2777335, 22.0160323], [112.2776058, 22.0159735], [112.2776119, 22.0162441], [112.277613, 22.0162797], [112.2776901, 22.0159297], [112.2776718, 22.0159579], [112.2776664, 22.0160062], [112.2776555, 22.0160424], [112.2776822, 22.0163974], [112.2776653, 22.0165653], [112.277671, 22.0165485], [112.2776557, 22.0165534], [112.2776157, 22.0157634], [112.2777147, 22.0160169], [112.2777923, 22.0161012], [112.2777863, 22.0160907], [112.2777051, 22.016329], [112.2777147, 22.0162952], [112.2777142, 22.0162654], [112.2777091, 22.0162184], [112.2777293, 22.0155411], [112.2777934, 22.016181], [112.277763, 22.0163602], [112.2777463, 22.0162394], [112.2777951, 22.0166046], [112.2776927, 22.0162132], [112.2777378, 22.0165474], [112.2775909, 22.0162195], [112.2775837, 22.0163702], [112.2773571, 22.0163615], [112.2774887, 22.0162945], [112.2779636, 22.0155648], [112.2776821, 22.0153425], [112.2775655, 22.01528], [112.277327, 22.0165847], [112.2776053, 22.0159045], [112.2776661, 22.0159655], [112.2777093, 22.0158935], [112.2777605, 22.0160012], [112.2774871, 22.0163442], [112.2775043, 22.0159103], [112.2774271, 22.0161922], [112.2775719, 22.0157997], [112.2779507, 22.0161869], [112.2772691, 22.0158395], [112.2774603, 22.0160507], [112.2773284, 22.0161886], [112.2769806, 22.0162803], [112.277367, 22.0160714], [112.2774255, 22.0156315], [112.2773364, 22.0165652], [112.2779057, 22.0172664], [112.2773697, 22.0159611], [112.2775842, 22.0168184], [112.2771331, 22.0168276], [112.276935, 22.0170211], [112.2771452, 22.0167653], [112.2772963, 22.0167357], [112.2773487, 22.016833], [112.2771117, 22.0170429], [112.2772882, 22.0150137], [112.277676, 22.0157572], [112.2775809, 22.0157616], [112.2776087, 22.0151958], [112.2775472, 22.0157747], [112.2776357, 22.0154047], [112.2776435, 22.0164565], [112.2776643, 22.0169043], [112.2764386, 22.0158418], [112.2777676, 22.016478], [112.2777093, 22.0165748], [112.2777221, 22.016404], [112.2775944, 22.0157735], [112.2777799, 22.0157752], [112.2776128, 22.0154483], [112.2777016, 22.0151869], [112.2775887, 22.0153978], [112.2775413, 22.0154168], [112.2776436, 22.0155891], [112.277575, 22.0155052], [112.2776914, 22.0161053], [112.2774094, 22.0156116], [112.2773298, 22.0158133], [112.2773486, 22.0160223], [112.2773499, 22.0160166], [112.2773534, 22.0160091], [112.2773868, 22.01594], [112.2776449, 22.0154259], [112.2775975, 22.016411], [112.2777683, 22.0155985], [112.2777066, 22.0155994], [112.2776718, 22.0156146], [112.2776693, 22.0156116], [112.2776541, 22.0155184], [112.2776593, 22.0160912], [112.277661, 22.016092], [112.2778694, 22.0157039], [112.2779937, 22.0157449], [112.2777242, 22.0159336], [112.2777495, 22.016103], [112.2774126, 22.0164878], [112.2774447, 22.0164391], [112.2774575, 22.0164354], [112.2775494, 22.0164708], [112.2777794, 22.0165267], [112.2775416, 22.0161283], [112.2774464, 22.0163779], [112.2778153, 22.0165429], [112.2776616, 22.0162139], [112.2774604, 22.0162103], [112.2776942, 22.0160659], [112.2775707, 22.0163708], [112.2774991, 22.0160763], [112.2774355, 22.0162447], [112.2776771, 22.0160008], [112.2776718, 22.0160062], [112.277704, 22.015915], [112.2777063, 22.0159108], [112.2775323, 22.0164836], [112.2777955, 22.0167154], [112.2778581, 22.0175943], [112.2776463, 22.0159604], [112.27762, 22.0163717], [112.2775426, 22.0163401], [112.2775736, 22.0157782], [112.2776664, 22.0157741], [112.2776853, 22.0163118], [112.2777307, 22.0162768], [112.2775162, 22.0161832], [112.2776874, 22.0162421]]
+            }
+        }
+        var point = {
+            "type": "FeatureCollection",
+            "features": [{
+                "type": "Feature",
+                "properties": {},
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": route.geometry.coordinates[0]
+                }
+            }]
+        };
+        var bbox = turf.bbox(route)
+        //console.log(center,'center')
+        //var bbox = [[-79, 43], [-73, 45]];
+        map.fitBounds(bbox, {
+            padding: { top: 10, bottom: 10, left: 10, right: 10 }
+        });
+        var counter = 0;
+        console.time('route')
+        let aLength = route.geometry.coordinates.length;
+        var nstep = 1000;
+        var newroute = getRoute(route, nstep, { units: 'kilometers' })
+        console.timeEnd('route')
+        //console.log(newroute, route)
+        var steps = newroute.geometry.coordinates.length
+
+        var realline = {
+            "type": "FeatureCollection",
+            "features": [{
+                "type": "Feature",
+                "geometry": {
+                    "type": "LineString",
+                    "coordinates": [[0, 0]]
+                }
+            }]
+        }
+        var arrow = {
+            "type": "FeatureCollection",
+            "features": [[]]
+        }
+        function lineMore(from, to, distance, splitLength, units) {
+            var step = parseInt(distance / splitLength)
+            var leftLength = distance - step * splitLength
+            var rings = []
+            var route = turf.lineString([from.geometry.coordinates, to.geometry.coordinates])
+            for (let i = 1; i <= step; i++) {
+                let nlength = i * splitLength
+                let pnt = turf.along(route, nlength, { units: 'kilometers' });
+                rings.push(pnt.geometry.coordinates)
+            }
+            if (leftLength > 0) {
+                rings.push(to.geometry.coordinates)
+            }
+            return rings
+        }
+        function getRoute(route, nstep, units) {
+            var newroute = {
+                "type": "Feature",
+                "geometry": {
+                    "type": "LineString",
+                    "coordinates": []
+                }
+            }
+            var lineDistance = turf.lineDistance(route);
+            var nDistance = lineDistance / nstep;
+            console.log(nstep, nDistance)
+            for (let i = 0; i < aLength - 1; i++) {
+                var from = turf.point(route.geometry.coordinates[i]);
+                var to = turf.point(route.geometry.coordinates[i + 1]);
+                let lDistance = turf.distance(from, to, units);
+                if (i == 0) {
+                    newroute.geometry.coordinates.push(route.geometry.coordinates[0])
+                }
+                if (lDistance > nDistance) {
+                    let rings = lineMore(from, to, lDistance, nDistance, units)
+                    newroute.geometry.coordinates = newroute.geometry.coordinates.concat(rings)
+                } else {
+                    newroute.geometry.coordinates.push(route.geometry.coordinates[i + 1])
+                }
+            }
+            return newroute
+        }
+        function animate() {
+            if (counter == 0) {
+                point.features[0].geometry.coordinates = newroute.geometry.coordinates[0];
+                realline.features[0].geometry.coordinates = []
+                arrow.features = [[]]
+                realline.features[0].geometry.coordinates.push(point.features[0].geometry.coordinates)
+                map.getSource('point').setData(point);
+            } else if (counter !== 0 && counter < steps) {
+                point.features[0].geometry.coordinates = newroute.geometry.coordinates[counter];
+                realline.features[0].geometry.coordinates.push(point.features[0].geometry.coordinates)
+                let startPnt = newroute.geometry.coordinates[counter - 1]
+                let endPnt = newroute.geometry.coordinates[counter]
+                point.features[0].properties.bearing = turf.bearing(
+                    turf.point(startPnt),
+                    turf.point(endPnt)
+                ) + 90;
+                if (counter % 10 == 0) {
+                    var midPnt = turf.midpoint(startPnt, endPnt);
+                    midPnt.properties.bearing = point.features[0].properties.bearing
+                    arrow.features.push(midPnt)
+                    map.getSource('arrow').setData(arrow);
+                }
+                map.getSource('point').setData(point);
+                map.getSource('realroute').setData(realline);
+            }
+            if (counter < steps) {
+                requestAnimationFrame(animate);
+            }
+            counter = counter + 1;
+        }
+        map.on('load', function () {
+            map.loadImage("arrow.png", function (error, image) {
+                if (error) throw error;
+                map.addImage('arrow', image);
+                map.addLayer({
+                    "id": "arrow",
+                    "source": {
+                        "type": "geojson",
+                        "data": arrow
+                    },
+                    "type": "symbol",
+                    "layout": {
+                        "icon-image": "arrow",
+                        "icon-size": 0.04,
+                        "icon-rotate": ["get", "bearing"],
+                        "icon-rotation-alignment": "map",
+                        "icon-allow-overlap": true,
+                        "icon-ignore-placement": true
+                    }
+                })
+            })
+            map.loadImage('car.png', function (error, image) {
+                if (error) throw error;
+                map.addImage('car', image);
+                map.addLayer({
+                    "id": "route",
+                    "type": "line",
+                    "source": {
+                        "type": "geojson",
+                        "data": route
+                    },
+                    "layout": {
+                        "line-miter-limit": 2,
+                        "line-join": "miter"
+                    },
+                    "paint": {
+                        "line-color": "#d4237a",
+                        "line-width": 10
+                        // "line-dasharray": [0, 4, 3]
+                    }
+                });
+                map.addLayer({
+                    "id": "realroute",
+                    "type": "line",
+                    "source": {
+                        "type": "geojson",
+                        "data": realline
+                    },
+                    "layout": {
+                        "line-miter-limit": 2,
+                        "line-join": "miter"
+                    },
+                    "paint": {
+                        "line-color": "#AF5",
+                        "line-width": 8,
+                    }
+                });
+                map.addLayer({
+                    "id": "point",
+                    "source": {
+                        "type": "geojson",
+                        "data": point
+                    },
+                    "type": "symbol",
+                    "layout": {
+                        "icon-image": "car",
+                        "icon-size": 0.1,
+                        "icon-rotate": ["get", "bearing"],
+                        "icon-rotation-alignment": "map",
+                        "icon-allow-overlap": true,
+                        "icon-ignore-placement": true
+                    }
+                })
+            });
+            document.getElementById('replay').addEventListener('click', function () {
+                counter = 0;
+                animate();
+            });
+        });
+    </script>
+
+</body>
+
+</html>
