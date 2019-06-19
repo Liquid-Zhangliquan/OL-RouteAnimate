@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>轨迹动画</title>
+    <link href="maptalks.css" rel="stylesheet" type="text/css" />
+    <script src="maptalks.js"></script>
+    <style>
+        #animation {
+            z-index: 5000;
+            position: absolute;
+            left: 150px;
+            top: 25px;
+        }
+
+        #stop {
+            z-index: 5000;
+            position: absolute;
+            left: 250px;
+            top: 25px;
+        }
+
+        html,
+        body,
+        #map {
+            padding: 0px;
+            margin: 0px;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <button id="animation" onclick="animation()">开始</button>
+    <button id="stop" onclick="stop()">停止</button>
+    <div id="map">
+
+    </div>
+    <script>
+        //百度白色底图
+        var white_bd = 'http://online{s}.map.bdimg.com/onlinelabel/?qt=tile&x={x}&y={y}&z={z}&styles=pl&scaler=1&p=1';
+        //百度深色底图
+        var bule_bd = 'http://api{s}.map.bdimg.com/customimage/tile?&x={x}&y={y}&z={z}&udt=20170620&scale=1&ak=8d6c8b8f3749aed6b1aff3aad6f40e37&styles=t%3Awater%7Ce%3Aall%7Cc%3A%23044161%2Ct%3Aland%7Ce%3Aall%7Cc%3A%23091934%2Ct%3Aboundary%7Ce%3Ag%7Cc%3A%23064f85%2Ct%3Arailway%7Ce%3Aall%7Cv%3Aoff%2Ct%3Ahighway%7Ce%3Ag%7Cc%3A%23004981%2Ct%3Ahighway%7Ce%3Ag.f%7Cc%3A%23005b96%7Cl%3A1%2Ct%3Ahighway%7Ce%3Al%7Cv%3Aon%2Ct%3Aarterial%7Ce%3Ag%7Cc%3A%23004981%7Cl%3A-39%2Ct%3Aarterial%7Ce%3Ag.f%7Cc%3A%2300508b%2Ct%3Agreen%7Ce%3Aall%7Cv%3Aoff%7Cc%3A%23056197%2Ct%3Asubway%7Ce%3Aall%7Cv%3Aoff%2Ct%3Amanmade%7Ce%3Aall%7Cv%3Aoff%2Ct%3Alocal%7Ce%3Aall%7Cv%3Aoff%2Ct%3Aarterial%7Ce%3Al%7Cv%3Aon%2Ct%3Aboundary%7Ce%3Ag.f%7Cc%3A%23029fd4%2Ct%3Abuilding%7Ce%3Aall%7Cc%3A%231a5787%2Ct%3Apoi%7Ce%3Aall%7Cv%3Aoff%2Ct%3Aall%7Ce%3Al%7Cv%3Aoff';
+        var map = new maptalks.Map('map', {
+            center: [114.33795683551146, 30.585243318889884],
+            zoom: 17,
+            minZoom: 1,
+            maxZoom: 19,
+            spatialReference: {
+                projection: 'baidu'
+            },
+            baseLayer: new maptalks.TileLayer('base', {
+                'urlTemplate': bule_bd,
+                'subdomains': [0, 1, 2],
+                'attribution': '&copy; <a target="_blank" href="http://map.baidu.com">Baidu</a>'
+            })
+        });
+
+        map.on('click', function (e) {
+            console.log(e.coordinate);
+        })
+
+
+        //摄像头
+        var sxtData = [
+            { coord: [114.3341300540389, 30.584660286055218], id: 1, data: { speed: 40, time: '2019年6月19日16:56:19', ad: '友谊大道136号' } },
+            { coord: [114.32971039092979, 30.581722283737765], id: 2, data: { speed: 30, time: '2019年6月19日16:57:59', ad: '友谊大道135号' } },
+            { coord: [114.33199208692514, 30.58024547612451], id: 3, data: { speed: 31, time: '2019年6月19日16:58:04', ad: '友谊大道134号' } },
+            { coord: [114.33513615621007, 30.57782035328383], id: 4, data: { speed: 35, time: '2019年6月19日16:58:08', ad: '友谊大道133号' } },
+        ];
+
+        var markerArr = [];
+
+        for (var i = 0; i < sxtData.length; i++) {
+            markerArr.push(
+                new maptalks.Marker(sxtData[i].coord,
+                    {
+                        'id': sxtData[i].id,
+                        'symbol': {
+                            'markerFile': '../images/normal_gray.png',
+                            'markerWidth': 32,
+                            'markerHeight': 32
+                        },
+                        'properties': {
+                            'data': sxtData[i].data,
+                            'status': 'gray'
+                        },
+                    }
+                ).on('click', SxtClick)
+            )
+        }
+
+        function SxtClick(e) {
+            var m = e.target;
+            var properties = m.getProperties();
+            var data = properties.data;
+            var status = properties.status;
+            var markerFile = '../images/normal_gray.png';
+            if (status === 'gray') {
+                markerFile = '../images/normal.png';
+                m.setProperties({
+                    data: data,
+                    status: 'normal'
+                })
+            } else {
+                markerFile = '../images/normal_gray.png';
+                m.setProperties({
+                    data: data,
+                    status: 'gray'
+                })
+            }
+            m.setSymbol({
+                'markerFile': markerFile,
+            })
+        }
+
+        var SxtLayer = new maptalks.VectorLayer('sxt', markerArr);
+        map.addLayer(SxtLayer);
+
+
+        //轨迹
+        var path = [
+            [114.33590869894864, 30.58369650684698],
+            [114.33551344452425, 30.583478877944458],
+            [114.3341300540389, 30.584660286055218],
+            [114.33068056088057, 30.582344090672404],
+            [114.32971039092979, 30.581722283737765],
+            [114.33199208692514, 30.58024547612451],
+            [114.33493852899787, 30.577929174211285],
+            [114.33513615621007, 30.57782035328383],
+            [114.33540564786306, 30.577789261567617],
+            [114.3377053099686, 30.578644280094487],
+            [114.3377592082992, 30.57872200867387],
+            [114.33646564836484, 30.581209289984336],
+            [114.33477683400608, 30.5826549926292]
+        ]
+        var line = new maptalks.LineString(path, {
+            symbol: {
+                'lineColor': '#1bbc9b',
+                'lineWidth': 6
+            }
+        });
+        var carLine = new maptalks.LineString(path, {
+            symbol: [{
+                'lineColor': '#ec0404',
+                'lineWidth': 6,
+                //'linePatternFile': '../images/arrow.png'
+            }, {
+                'markerFile': '../images/car.png',
+                'markerPlacement': 'vertex-last', //vertex, point, vertex-first, vertex-last, center
+                'markerVerticalAlignment': 'middle',
+                'markerWidth': 75,
+                'markerHeight': 50
+            }],
+        });
+        carLine.hide();
+        var lineAnimateLayer = new maptalks.VectorLayer('carline', [line, carLine]);
+        map.addLayer(lineAnimateLayer);
+
+
+        function LineDistanBuff(step) {
+            var geometries = SxtLayer.getGeometries();
+            for (var j = 0; j < geometries.length; j++) {
+                var _m = geometries[j];
+                var _properties = _m.getProperties();
+                var _data = _properties.data;
+                var _coord = _m.getCoordinates();
+                var _path = [[_coord.x, _coord.y], [step.x, step.y]];
+                var _line = new maptalks.LineString(_path);
+                var dist = _line.getLength();
+                if (dist < 5) {
+                    _m.setProperties({
+                        data: _data,
+                        status: 'normal'
+                    })
+                    _m.setSymbol({
+                        'markerFile': '../images/normal.png',
+                    })
+                }
+            }
+
+        }
+
+
+
+
+        function animation() {
+            carLine.animateShow(
+                {
+                    duration: 12000,
+                    easing: 'out'
+                }, function (frame, step) {
+                    LineDistanBuff(step)
+                    if (frame.state.playState === 'running') {
+                        //carLine.show();
+                    } else if (frame.state.playState === 'finished') {
+                        console.log('finished');
+                    }
+                });
+        }
+        function stop() {
+
+        }
+    </script>
+</body>
+
+</html>

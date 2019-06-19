@@ -3,189 +3,42 @@
 
 <head>
     <title>轨迹动画</title>
-    <link href="ol.css" rel="stylesheet" type="text/css" />
-    <script src="ol-debug.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
     <style>
-        * {
+        html,
+        body {
+            width: 100%;
+            height: 100%;
             padding: 0px;
             margin: 0px;
         }
 
-        #animation {
-            z-index: 5000;
-            position: absolute;
-            left: 150px;
-            top: 25px;
+        .container {
+            width: 90%;
+            margin: auto;
+            padding-left: 30px;
         }
 
-        #stop {
-            z-index: 5000;
-            position: absolute;
-            left: 250px;
-            top: 25px;
+        a {
+            line-height: 30px;
+            text-decoration: none;
         }
 
-        html,
-        body,
-        #map {
-            width: 100%;
-            height: 100%;
+        a:hover {
+            color: grey;
         }
     </style>
 </head>
 
 <body>
-
-    <div id="map">
-        <button id="animation">开始</button>
-        <button id="stop">停止</button>
+    <div class="container">
+        <h2>line-animate-demo</h2>
+        <a href="openlayer/openlayer_route.html" target="_blank">openlayer_route</a><br>
+        <a href="mapbox/mapbox_route.html" target="_blank">mapbox_route</a><br>
+        <a href="maptalks/maptalks_route.html" target="_blank">maptalks_route</a><br>
     </div>
-    <script>
-        var layer = new ol.layer.Tile({
-            source: new ol.source.XYZ({
-                url: 'http://www.google.cn/maps/vt?pb=!1m5!1m4!1i{z}!2i{x}!3i{y}!4i256!2m3!1e0!2sm!3i342009817!3m9!2szh-CN!3sCN!5e18!12m1!1e47!12m3!1e37!2m1!1ssmartmaps!4e0&token=32965'
-            })
-        });
-        var vector = new ol.layer.Vector({
-            source: new ol.source.Vector()
-        });
-
-        var lineAnimateLayer = new ol.layer.Vector({
-            source: new ol.source.Vector(),
-            style: new ol.style.Style({
-                stroke: new ol.style.Stroke({
-                    color: '#ec0404',
-                    width: 1
-                })
-            }),
-            Zindex: 999,
-            visible: false
-        });
-
-        var view = new ol.View({
-            center: new ol.proj.fromLonLat([114.56, 30.66]),
-            zoom: 13
-        });
-        var map = new ol.Map({
-            layers: [layer, vector, lineAnimateLayer],
-            view: view,
-            target: "map",
-            logo: false
-        })
-
-        var lineF = [new ol.proj.fromLonLat([114.56, 30.66]), new ol.proj.fromLonLat([114.66, 30.66]), new ol.proj.fromLonLat([114.66, 30.63]), new ol.proj.fromLonLat([114.67, 30.63]), new ol.proj.fromLonLat([114.67, 30.65]), new ol.proj.fromLonLat([114.62, 30.63]), new ol.proj.fromLonLat([114.61, 30.64])];
-        var fastLine = new ol.Feature({
-            geometry: new ol.geom.LineString(lineF)
-        });
-        vector.getSource().addFeature(fastLine);
-
-        //lineAnimateLayer.getSource().addFeature(fastLine.clone());
-
-        var lineS = [new ol.proj.fromLonLat([130, 22]), new ol.proj.fromLonLat([145, 39]), new ol.proj.fromLonLat([140, 32])];
-        var slowLine = new ol.Feature({
-            geometry: new ol.geom.LineString(lineS)
-        });
-        vector.getSource().addFeature(slowLine);
-
-        var point2 = new ol.Feature({
-            geometry: new ol.geom.Point(new ol.proj.fromLonLat([130, 22]))
-        });
-        vector.getSource().addFeature(point2);
-
-
-
-
-        var point = new ol.Feature({
-            geometry: new ol.geom.Point(new ol.proj.fromLonLat([114.56, 30.66])),
-        });
-        point.setStyle(new ol.style.Style({
-            image: new ol.style.Icon({
-                src: "car.png"
-            })
-        }));
-        var origin = point.clone();
-        vector.getSource().addFeature(point);
-        var step = 0.01,
-            requestID;
-        var key = 0;
-        function animation(step) {
-
-            requestID = requestAnimationFrame(function () {
-                if (step <= 1) {
-                    key++;
-                    var second = fastLine.getGeometry().getCoordinateAt(step);
-                    var first
-                    if (key === 1) {
-                        first = origin.getGeometry().getCoordinates();
-                    } else {
-                        first = point.getGeometry().getCoordinates();
-                    }
-
-                    var angle = -Math.atan((second[1] - first[1]) / (second[0] - first[0]));
-                    LineAnimate(second, angle);
-                    point.getGeometry().setCoordinates(fastLine.getGeometry().getCoordinateAt(step));
-                    point.getStyle().getImage().setRotation(angle);
-                    point2.getGeometry().setCoordinates(slowLine.getGeometry().getCoordinateAt(step));
-                    step = step + 0.003;
-                    animation(step);
-                }
-            }, 60);
-        }
-
-        var precoord, preangle;
-        var routePath = [];
-        var turnNum = 0;
-
-        function LineAnimate(second, angle) {
-            console.log(angle);
-            if (!lineAnimateLayer.getVisible()) {
-                lineAnimateLayer.setVisible(true)
-            }
-            if (key === 1) {
-                preangle = angle;
-                routePath.push(origin.getGeometry().getCoordinates(), second);
-                var line = new ol.Feature({
-                    geometry: new ol.geom.LineString(routePath)
-                });
-                lineAnimateLayer.getSource().addFeature(line);
-            } else {
-                var len = routePath.length;
-                if (preangle === angle) {
-                    routePath[len - 1] = second;
-                    precoord = second;
-                } else {
-                    turnNum++
-                    preangle = angle;
-                    routePath.push(second);
-                    // var turn = fastLine.getGeometry().getCoordinates()[turnNum];
-                    // if (turn) {
-                    //     routePath.push(fastLine.getGeometry().getCoordinates()[turnNum]);//添加拐点
-                    // } else {
-                    //     turn = fastLine.getGeometry().getCoordinates()[turnNum--];
-                    //     routePath[len - 1] = fastLine.getGeometry().getCoordinates()[turnNum];//添加拐点
-                    // }
-
-                }
-            }
-            lineAnimateLayer.getSource().getFeatures()[0].getGeometry().setCoordinates(routePath);
-        };
-
-
-        document.getElementById("animation").onclick = function () {
-            turnNum = 0;
-            key = 0;
-            preangle = null;
-            routePath = [];
-            lineAnimateLayer.getSource().clear();
-            animation(step);
-        }
-        document.getElementById("stop").onclick = function () {
-            cancelAnimationFrame(requestID);
-        }
-
-
-        //18417268004
-    </script>
 </body>
 
 </html>
