@@ -9,5 +9,6 @@
 * [掘金地址](https://juejin.im/post/5cfc98e351882515ba0eefe1)
 * [github地址](https://github.com/tpolong/route)
 ## 体验地址
-* [openlayer版本](https://liquid-zhangliquan.github.io/OL-RouteAnimate/)
-* [mapbox版本](https://liquid-zhangliquan.github.io/OL-RouteAnimate/mapbox_route.html)
+* [openlayer版本](https://liquid-zhangliquan.github.io/OL-RouteAnimate/openlayer/openlayer_route.html)
+* [mapbox版本](https://liquid-zhangliquan.github.io/OL-RouteAnimate/mapbox/mapbox_route.html)
+* [maptalks版本](https://liquid-zhangliquan.github.io/OL-RouteAnimate/maptalks/maptalks_route.html)

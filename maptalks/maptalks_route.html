@@ -20,6 +20,13 @@
             top: 25px;
         }
 
+        #continue {
+            z-index: 5000;
+            position: absolute;
+            left: 350px;
+            top: 25px;
+        }
+
         html,
         body,
         #map {
@@ -32,8 +39,9 @@
 </head>
 
 <body>
-    <button id="animation" onclick="animation()">开始</button>
+    <button id="animation" onclick="start()">开始</button>
     <button id="stop" onclick="stop()">停止</button>
+    <button id="continue" onclick="continue_play()">继续</button>
     <div id="map">
 
     </div>
@@ -60,7 +68,6 @@
         map.on('click', function (e) {
             console.log(e.coordinate);
         })
-
 
         //摄像头
         var sxtData = [
@@ -118,7 +125,6 @@
         var SxtLayer = new maptalks.VectorLayer('sxt', markerArr);
         map.addLayer(SxtLayer);
 
-
         //轨迹
         var path = [
             [114.33590869894864, 30.58369650684698],
@@ -158,7 +164,6 @@
         var lineAnimateLayer = new maptalks.VectorLayer('carline', [line, carLine]);
         map.addLayer(lineAnimateLayer);
 
-
         function LineDistanBuff(step) {
             var geometries = SxtLayer.getGeometries();
             for (var j = 0; j < geometries.length; j++) {
@@ -179,14 +184,26 @@
                     })
                 }
             }
-
         }
 
+        function RestSxtStatus() {
+            SxtLayer.getGeometries().map((item) => {
+                var _properties = item.getProperties();
+                var _data = _properties.data;
+                item.setProperties({
+                    data: _data,
+                    status: 'gray'
+                })
+                item.setSymbol({
+                    'markerFile': '../images/normal_gray.png',
+                })
+            })
+        }
 
-
-
-        function animation() {
-            carLine.animateShow(
+        var player;
+        function start() {
+            RestSxtStatus();
+            player = carLine.animateShow(
                 {
                     duration: 12000,
                     easing: 'out'
@@ -200,7 +217,14 @@
                 });
         }
         function stop() {
-
+            if (player) {
+                player.finished ? null : player.pause()
+            }
+        }
+        function continue_play() {
+            if (player) {
+                player.play()
+            }
         }
     </script>
 </body>
