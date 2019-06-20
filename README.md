@@ -8,6 +8,11 @@
 大家参照朋友利用mapbox和turf的LineSliceAlong对轨迹进行增密
 * [掘金地址](https://juejin.im/post/5cfc98e351882515ba0eefe1)
 * [github地址](https://github.com/tpolong/route)
+## maptalks实现轨迹
+maptalks是我接触最早的一个开源二三维地图api
+line直接提供[animateShow](http://maptalks.org/maptalks.js/api/0.x/LineString.html#animateShow)这个方法
+* maptalks将line.animateShow()返回的对象作为player，所以可以直接执行pause,play等方法控制播放
+* 小车经过摄像头时改变摄像头状态（计算小车到摄像头的距离，小于某个值，激活摄像头)
 ## 体验地址
 * [openlayer版本](https://liquid-zhangliquan.github.io/OL-RouteAnimate/openlayer/openlayer_route.html)
 * [mapbox版本](https://liquid-zhangliquan.github.io/OL-RouteAnimate/mapbox/mapbox_route.html)
