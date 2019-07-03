@@ -21280,6 +21280,18 @@
     'rotateWithMap': false
   };
 
+  var position$option = {
+    'center':'translate(0%,100%)',
+    'top':'translate(0%,0%)',
+    'right':'translate(75%,100%)',
+    'bottom':'translate(0%,200%)',
+    'left':'translate(-75%,100%)',
+    'top-left':'translate(-75%,0%)',
+    'top-right':'translate(75%,0%)',
+    'bottom-left':'translate(-75%,200%)',
+    'bottom-right':'translate(75%,200%)'
+  };
+
   var UIComponent = function (_Eventable) {
     _inheritsLoose(UIComponent, _Eventable);
 
@@ -21763,9 +21775,11 @@
           r += " rotateZ(" + Math.round(-bearing) + "deg)";
         }
 
-        return 'translate3d(' + p.x + 'px,' + p.y + 'px, 0px)' + r;
+        // return 'translate3d(' + p.x + 'px,' + p.y + 'px, 0px)' + r;
+        return position$option[this.options['position']] + ' translate3d(' + p.x + 'px,' + p.y + 'px, 0px)' + r;
       } else {
-        return 'translate(' + p.x + 'px,' + p.y + 'px)';
+        // return 'translate(' + p.x + 'px,' + p.y + 'px)';
+        return position$option[this.options['position']] + ' translate(' + p.x + 'px,' + p.y + 'px)';
       }
     };
 
