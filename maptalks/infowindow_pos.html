@@ -6,7 +6,6 @@
     <link href="maptalks.css" rel="stylesheet" type="text/css" />
     <script src="maptalks.js"></script>
     <style>
-
         html,
         body,
         #map {
@@ -34,6 +33,23 @@
             })
         });
 
+        var toolbar = new maptalks.control.Toolbar({
+            position: 'top-right',
+            items: [
+                {
+                    item: 'item1',
+                    click: function () {
+                        alert('item1 clicked');
+                    }
+                },
+                {
+                    item: 'item2',
+                    click: function () {
+                        alert('item2 clicked');
+                    }
+                }
+            ]
+        }).addTo(map);
 
         //debugger
         var point1 = new maptalks.Marker(
@@ -42,9 +58,8 @@
         var options = {
             'title': 'title',
             'content': '666',
-            'width':100,
-            'single':false,
-            'position':'top-right'
+            'width': 100,
+            'single': false
         };
         var infoWindow1 = new maptalks.ui.InfoWindow(options);
         infoWindow1.addTo(point1);
@@ -56,9 +71,9 @@
         var options2 = {
             'title': 'title',
             'content': '777',
-            'width':200,
-            'single':false,
-            'position':'top-left'
+            'width': 200,
+            'single': false,
+            'position': 'top-left'
         };
         var infoWindow2 = new maptalks.ui.InfoWindow(options2);
         infoWindow2.addTo(point2);
@@ -70,9 +85,9 @@
         var options3 = {
             'title': 'title',
             'content': '888',
-            'width':300,
-            'single':false,
-            'position':'bottom-left'
+            'width': 300,
+            'single': false,
+            'position': 'bottom-left'
         };
         var infoWindow3 = new maptalks.ui.InfoWindow(options3);
         infoWindow3.addTo(point3);

@@ -21270,6 +21270,7 @@
     'eventsToStop': null,
     'dx': 0,
     'dy': 0,
+    'position': 'top',
     'autoPan': false,
     'autoPanDuration': 600,
     'single': true,
